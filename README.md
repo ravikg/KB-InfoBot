@@ -5,7 +5,14 @@ This repository contains all the code and data accompanying the paper [Towards E
 
 Prerequisites
 --------------------------------------------------
-See [requirements.txt](./requirements.txt) for required packacges. Also download nltk data:
+See [requirements.txt](./requirements.txt) for required packacges. To install Lasagne==0.2.dev1 use following:
+
+```sh
+pip install https://github.com/Lasagne/Lasagne/archive/master.zip
+
+```
+
+Also download nltk data:
 ```sh
 python -m nltk.downloader all
 ```

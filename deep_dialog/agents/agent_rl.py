@@ -11,7 +11,7 @@ import sys
 from collections import Counter, defaultdict, deque
 
 import random
-import cPickle as pkl
+import pickle as pkl
 
 def categorical_sample(probs, mode='sample'):
     if mode=='max':
@@ -31,7 +31,7 @@ def categorical_sample(probs, mode='sample'):
 
 def aggregate_rewards(rewards,discount):
     running_add = 0.
-    for t in xrange(1,len(rewards)):
+    for t in range(1,len(rewards)):
         running_add += rewards[t]*discount**(t-1)
     return running_add
 
@@ -51,6 +51,8 @@ class RLAgent:
         in_var = T.reshape(input_var, (input_var.shape[0]*input_var.shape[1],self.in_size))
 
         l_mask_in = L.InputLayer(shape=(None,None), input_var=turn_mask)
+
+        print (theano.config.floatX)
 
         pol_in = T.fmatrix('pol-h')
         l_in = L.InputLayer(shape=(None,None,self.in_size), input_var=input_var)
@@ -112,10 +114,10 @@ class RLAgent:
         self.train_fn = theano.function(self.inps, self.loss, updates=updates)
 
     def _debug(self, inp, tur, act, rew):
-        print 'Input = {}, Action = {}, Reward = {}'.format(inp, act, rew)
+        print ('Input = {}, Action = {}, Reward = {}'.format(inp, act, rew))
         out = self.debug_fn(inp, tur, act, rew)
         for item in out:
-            print item
+            print (item)
 
     def _init_experience_pool(self, pool):
         self.input_pool = deque([], pool)
@@ -144,7 +146,7 @@ class RLAgent:
     def update(self, verbose=False, regime='RL'):
         i, t, a, r = self._get_minibatch(self.batch_size)
         pi = np.zeros((1,self.n_hid)).astype('float32')
-        if verbose: print i, t, a, r
+        if verbose: print (i, t, a, r)
         if regime=='RL':
             r -= np.mean(r)
             #r /= np.std(r)
@@ -162,8 +164,8 @@ class RLAgent:
         return obj
 
     def load_model(self, load_path):
-        with open(load_path, 'r') as f:
-            data = pkl.load(f)
+        with open(load_path, 'rb') as f:
+            data = pkl.load(f, encoding='latin1')
         L.set_all_param_values(self.network, data)
 
     def save_model(self, save_path):

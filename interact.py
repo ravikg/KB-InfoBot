@@ -1,6 +1,10 @@
 '''
 '''
 
+import theano
+
+theano.config.floatX = 'float32'
+
 WELCOME="""\nHello and welcome to the InfoBot! Please take a moment to read the instructions below on how to interact with the system.
 
 BACKGROUND: The InfoBot helps users search a database for entities (in our case movies) based on its attributes (in our case any of actor, director, release-year, critic-rating, mpaa-rating). 
@@ -44,7 +48,7 @@ Type 'quit' to end the current dialog (it will be considered a failure). Press C
 
 import argparse, json, shutil, sys, os, random, copy
 import numpy as np
-import cPickle as pkl
+import pickle as pkl
 import datetime
 import importlib
 
@@ -81,7 +85,7 @@ params['max_first_turn'] = 5
 config = importlib.import_module('settings.config_'+params['db'])
 agent_params = config.agent_params
 dataset_params = config.dataset_params
-for k,v in dataset_params[params['db']].iteritems():
+for k,v in dataset_params[params['db']].items():
     params[k] = v
 
 max_turn = params['max_turn']
@@ -116,12 +120,14 @@ user_sim = CmdUser(movie_kb, act_set, slot_set, None, max_turn, err_prob, db_ful
         fdict_path = 'data/'+params['db']+'/fdict_2.p')
 
 # load all agents
-print WELCOME
-print "Loading agents... This may take a few minutes"
+print (WELCOME)
+print ("Loading agents... This may take a few minutes")
 agent_type = agent_map[params['agent']]
-for k,v in agent_params[agent_type].iteritems():
+for k,v in agent_params[agent_type].items():
     params[k] = v
 params['model_name'] = 'best_'+agent_type+'_imdb.m'
+
+
 
 if agent_type == 'simple-rl-soft':
     agent = AgentSimpleRLAllAct(movie_kb, act_set, slot_set, db_inc, train=False, _reload=True,
@@ -154,10 +160,10 @@ elif agent_type == 'e2e-rl-soft':
             pol_start=params['pol_start'], tr=params['tr'], ts=params['ts'], frac=params['frac'],
             max_req=params['max_req'], upd=params['upd'], name=params['model_name'])
 else:
-    print "Invalid Agent"
+    print ("Invalid Agent")
     sys.exit()
 
-uname = raw_input("Please Enter User Name: ").lower()
+uname = input("Please Enter User Name: ").lower()
 uid = hash(uname)
 
 cdir = "sessions/"+str(uid)+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+"/"
@@ -167,8 +173,8 @@ f.write(uname)
 f.close()
 try:
     for i in range(N):
-        print "--------------------------------------------------------------------------------"
-        print "Dialog %d" %i
+        print ("--------------------------------------------------------------------------------")
+        print ("Dialog %d" %i)
         dia = []
         curr_agent = agent
         dia.append(curr_agent)
@@ -183,6 +189,6 @@ try:
             total_reward += reward
             if episode_over:
                 break
-        pkl.dump(dia, open(cdir+str(i)+".p",'w'))
+        pkl.dump(dia, open(cdir+str(i)+".p",'wb'))
 except KeyboardInterrupt:
     sys.exit()
