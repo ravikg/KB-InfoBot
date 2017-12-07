@@ -43,7 +43,7 @@ class RuleSimulator:
     def _sample_action(self):
         self.state = {}
         
-        self.state['diaact'] = random.choice(dialog_config.start_dia_acts.keys())
+        self.state['diaact'] = random.choice(list(dialog_config.start_dia_acts.keys()))
         self.state['turn'] = 0
         self.state['inform_slots'] = {}
         self.state['request_slots'] = {}
@@ -51,14 +51,14 @@ class RuleSimulator:
         
         if (len(self.goal['inform_slots']) + len(self.goal['request_slots'])) > 0:
             if len(self.goal['inform_slots']) > 0:
-                care_about = [s for s,v in self.goal['inform_slots'].iteritems() if v is not None]
+                care_about = [s for s,v in self.goal['inform_slots'].items() if v is not None]
                 known_slots = random.sample(care_about, 
                         random.randint(1,min(self.max_first_turn,len(care_about))))
                 for s in known_slots:
                     self.state['inform_slots'][s] = self.goal['inform_slots'][s]
             
             if len(self.goal['request_slots']) > 0:
-                request_slot = random.choice(self.goal['request_slots'].keys())
+                request_slot = random.choice(list(self.goal['request_slots'].keys()))
                 self.state['request_slots'][request_slot] = 'UNK'
         
         if (self.state['diaact'] in ['thanks','closing']): episode_over = True
@@ -98,7 +98,7 @@ class RuleSimulator:
                     self.goal['inform_slots'][s] = None
             if all([v==None for v in self.goal['inform_slots'].values()]):
                 while True:
-                    s = random.choice(self.goal['inform_slots'].keys())
+                    s = random.choice(list(self.goal['inform_slots'].keys()))
                     i = self.database.slots.index(s)
                     val = self.database.tuples[self.goal['target']][i]
                     if val!='UNK':
@@ -111,7 +111,7 @@ class RuleSimulator:
                 [self.database.labels[self.goal['target']]] + \
                 self.database.tuples[self.goal['target']])]))
         print ('User information = ', ', '.join(['%s:%s' %(s,v) for s,v in \
-                self.goal['inform_slots'].iteritems() if v is not None]), '\n')
+                self.goal['inform_slots'].items() if v is not None]), '\n')
 
     ''' initialization '''
     def initialize_episode(self):
@@ -149,7 +149,7 @@ class RuleSimulator:
                     reward = dialog_config.FAILED_DIALOG_REWARD
                     self.state['diaact'] = 'deny'
             elif act == 'request':
-                slot = state['request_slots'].keys()[0]
+                slot = list(state['request_slots'].keys())[0]
                 if slot in self.goal['inform_slots']:
                     self.state['inform_slots'][slot] = self.goal['inform_slots'][slot]
                 else:

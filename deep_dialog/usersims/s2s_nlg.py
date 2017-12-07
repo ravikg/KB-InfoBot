@@ -23,7 +23,7 @@ class S2SNLG:
         self._load_model(model_file, temp)
 
     def _load_model(self, model_path, temp):
-        model_params = pkl.load(open(model_path, 'rb'))
+        model_params = pkl.load(open(model_path, 'rb'), encoding='latin1')
         hidden_size = model_params['model']['Wd'].shape[0]
         output_size = model_params['model']['Wd'].shape[1]
 
@@ -53,34 +53,34 @@ class S2SNLG:
 
     def generate_from_nlg(self, act, request_slots, inform_slots):
         act_string = act + '('
-        for s,v in request_slots.iteritems():
+        for s,v in request_slots.items():
             act_string += '%s=%s;' % (s,v) if v!='UNK' else '%s;' %s
-        i_slots = {k:v for k,v in inform_slots.iteritems() if v is not None}
-        for s,v in i_slots.iteritems():
+        i_slots = {k:v for k,v in inform_slots.items() if v is not None}
+        for s,v in i_slots.items():
             act_string += '%s=%s;' % (s,v)
         act_string = act_string.rstrip(';')
         act_string += ')'
         sent = predict.generate(self.model_params, self.rnnmodel, act_string)
         try:
-            out = unicode(sent)
+            out = str(sent)
         except UnicodeDecodeError:
-            out = unicode(sent.decode('utf8'))
+            out = str(sent.decode('utf8'))
         return out
 
     def generate_from_template(self, act, request_slots, inform_slots):
         n_r = len(request_slots.keys())
-        i_slots = {k:v for k,v in inform_slots.iteritems() if v is not None}
+        i_slots = {k:v for k,v in inform_slots.items() if v is not None}
         n_i = len(i_slots.keys())
         key = '%s_%d_%d' % (act, n_r, n_i)
 
         temp = random.choice(self.templates[key])
         sent = self._fill_slots(temp, request_slots, i_slots)
 
-        return unicode(sent)
+        return str(sent)
 
     def _fill_slots(self, temp, request_slots, i_slots):
-        reqs = request_slots.keys()
-        infs = i_slots.keys()
+        reqs = list(request_slots.keys())
+        infs = list(i_slots.keys())
         random.shuffle(reqs)
         random.shuffle(infs)
 

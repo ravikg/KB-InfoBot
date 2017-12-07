@@ -27,7 +27,7 @@ class Database:
 
     def _load_db(self, path):
         try:
-            fi = io.open(path,'r')
+            fi = io.open(path,'r', encoding='latin1')
             self.slots = fi.readline().rstrip().split('\t')[1:]
             tupl = [line.rstrip().split('\t') for line in fi]
             self.labels = [t[0] for t in tupl]

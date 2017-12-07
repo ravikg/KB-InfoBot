@@ -39,7 +39,7 @@ def ordered_sample(probs, N, mode='sample'):
         return np.argsort(probs)[::-1][:N]
     else:
         p = np.copy(probs)
-        pop = range(len(probs))
+        pop = list(range(len(probs)))
         sample = []
         for i in range(N):
             s = categorical_sample(p)
@@ -385,7 +385,7 @@ class E2ERLAgent:
         return obj
 
     def load_model(self, load_path):
-        with open(load_path, 'r') as f:
+        with open(load_path, 'rb') as f:
             data = pkl.load(f)
             L.set_all_param_values(self.network, data)
             for item in self.trackers:
@@ -393,7 +393,7 @@ class E2ERLAgent:
                 L.set_all_param_values(item, data)
 
     def save_model(self, save_path):
-        with open(save_path, 'w') as f:
+        with open(save_path, 'wb') as f:
             data = L.get_all_param_values(self.network)
             pkl.dump(data, f)
             for item in self.trackers:
